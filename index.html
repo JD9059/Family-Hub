@@ -4,37 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Hub Dashboard</title>
-    <!-- Tailwind CSS for clean, rapid styling -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar behavior for a cleaner look */
+        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6">
 
-    <!-- Header -->
     <header class="mb-8 text-center md:text-left">
         <h1 class="text-3xl font-bold tracking-tight text-white">Our Family Hub</h1>
-        <p class="text-slate-400">Smart Grocery List & Shared Calendar</p>
+        <p class="text-slate-400">Smart Grocery List & Shared Space</p>
     </header>
 
-    <!-- Main Grid Layout -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <!-- LEFT PANEL: Smart Grocery List (Spans 5 columns) -->
         <div class="lg:col-span-5 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col justify-between">
             <div>
                 <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
                     🛒 Smart Grocery List
                 </h2>
                 
-                <!-- Quick Add Input -->
                 <div class="flex gap-2 mb-6">
                     <input type="text" id="grocery-input" placeholder="Add any item (e.g., Milk, Apples, Bread)..." 
                            class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="addItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
+                    <button onclick="window.addItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
                         Add
                     </button>
                 </div>
 
-                <!-- Auto-Categorized Dynamic Sections -->
                 <div class="space-y-4">
                     <div>
                         <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">🥦 Produce</h3>
@@ -55,47 +55,61 @@
                 </div>
             </div>
 
-            <!-- Clear Action -->
-            <button onclick="clearChecked()" class="mt-6 w-full py-2 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
+            <button onclick="window.clearChecked()" class="mt-6 w-full py-2 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
                 Clear Checked Items
             </button>
         </div>
 
-        <!-- RIGHT PANEL: Live Apple Calendar Widget (Spans 7 columns) -->
-        <div class="lg:col-span-7 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[650px]">
-            <h2 class="text-xl font-semibold mb-4 text-white">
-                📅 Family Schedule
-            </h2>
+        <div class="lg:col-span-7 flex flex-col gap-6">
             
-            <!-- Calendar Embed Window -->
-            <div class="w-full flex-1 bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
-                <!-- 
-                  REPLACE THE SRC BELOW with your generated embed code from Tockify or AddEvent.
-                  Those services will turn your webcal:// link into an https:// link that works here.
-                -->
-                <div data-tockify-component="mini" data-tockify-calendar="jd2195"></div>
-<script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>
+            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[280px]">
+                <h2 class="text-lg font-semibold mb-3 text-white">📅 Family Schedule</h2>
+                <div class="w-full flex-1 bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
+                    <iframe src="https://tockify.com/em/demo/agenda" 
+                            class="w-full h-full border-0" 
+                            style="color-scheme: dark;">
+                    </iframe>
+                </div>
+            </div>
 
-</div> 
-    </div> <script type="module">
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[444px]">
+                <h2 class="text-lg font-semibold mb-3 text-white">📌 Family Fridge Notes</h2>
+                
+                <div class="flex gap-2 mb-4">
+                    <input type="text" id="post-input" placeholder="Pin a new post-it note..." 
+                           class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <button onclick="window.addPost()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl text-sm transition-colors shadow-md">
+                        Pin Note
+                    </button>
+                </div>
+
+                <div id="posts-container" class="flex-1 overflow-y-auto custom-scroll grid grid-cols-2 md:grid-cols-3 gap-4 p-2 bg-slate-900/40 rounded-xl border border-slate-700/50">
+                    </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
-        // 1. Paste YOUR unique Firebase config right here
         const firebaseConfig = {
-          apiKey: "AIzaSyDhXXDOIpSLhZj6l6lNOYI5x1TEs6HA5fw",
-          authDomain: "family-hub-7d2b2.firebaseapp.com",
-          databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com/",
-          projectId: "family-hub-7d2b2",
-          storageBucket: "family-hub-7d2b2.firebasestorage.app",
-          messagingSenderId: "528172577034",
-          appId: "1:528172577034:web:ca48f878d8ed0dc2854af3"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "family-hub-7d2b2.firebaseapp.com",
+            databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com/",
+            projectId: "family-hub-7d2b2",
+            storageBucket: "family-hub-7d2b2.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
         };
 
-        // 2. Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const dbRef = ref(db, 'groceryList');
+        
+        const groceryRef = ref(db, 'groceryList');
+        const postsRef = ref(db, 'familyPosts');
 
         const categories = {
             produce: ['apple', 'banana', 'lettuce', 'tomato', 'berry', 'berries', 'lemon', 'lime', 'onion', 'garlic', 'potato', 'avocado', 'salad'],
@@ -104,11 +118,20 @@
         };
 
         let globalItems = [];
+        let globalPosts = [];
 
-        // 3. LISTEN for live cloud updates
-        onValue(dbRef, (snapshot) => {
-            const data = snapshot.val();
-            globalItems = data || [];
+        // Post-it style variations (Tailwind color matching + slight rotation variations)
+        const postItStyles = [
+            { bg: 'bg-amber-100 text-amber-900 shadow-amber-900/20', tilt: 'rotate-1' },
+            { bg: 'bg-sky-100 text-sky-900 shadow-sky-900/20', tilt: '-rotate-1' },
+            { bg: 'bg-emerald-100 text-emerald-900 shadow-emerald-900/20', tilt: 'rotate-2' },
+            { bg: 'bg-rose-100 text-rose-900 shadow-rose-900/20', tilt: '-rotate-2' },
+            { bg: 'bg-purple-100 text-purple-900 shadow-purple-900/20', tilt: 'rotate-1' }
+        ];
+
+        // ----------------- GROCERY LOGIC -----------------
+        onValue(groceryRef, (snapshot) => {
+            globalItems = snapshot.val() || [];
             renderList();
         });
 
@@ -136,7 +159,7 @@
 
                 itemRow.querySelector('input').addEventListener('change', (e) => {
                     globalItems[index].checked = e.target.checked;
-                    set(dbRef, globalItems); 
+                    set(groceryRef, globalItems); 
                 });
 
                 container.appendChild(itemRow);
@@ -149,17 +172,64 @@
             if (!itemText) return;
 
             globalItems.push({ text: itemText, checked: false });
-            set(dbRef, globalItems); 
+            set(groceryRef, globalItems); 
             input.value = '';
         }
 
         window.clearChecked = function() {
             globalItems = globalItems.filter(item => !item.checked);
-            set(dbRef, globalItems); 
+            set(groceryRef, globalItems); 
         }
 
+        // ----------------- POST-IT NOTICE BOARD LOGIC -----------------
+        onValue(postsRef, (snapshot) => {
+            globalPosts = snapshot.val() || [];
+            renderPosts();
+        });
+
+        function renderPosts() {
+            const container = document.getElementById('posts-container');
+            container.innerHTML = '';
+
+            globalPosts.forEach((post, index) => {
+                // Determine style sequentially using the index pattern
+                const style = postItStyles[index % postItStyles.length];
+
+                const postCard = document.createElement('div');
+                // Build a square aspect-ratio card with soft paper edges
+                postCard.className = `${style.bg} ${style.tilt} aspect-square p-4 shadow-md rounded-sm flex flex-col justify-between transform hover:scale-105 hover:rotate-0 transition-all duration-200 relative group`;
+                
+                postCard.innerHTML = `
+                    <p class="text-sm font-medium tracking-wide font-sans overflow-y-auto custom-scroll pr-1 break-words max-h-[85%]">${post.text}</p>
+                    <button onclick="window.deletePost(${index})" class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 bg-black/10 hover:bg-black/20 text-current text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center transition-all">
+                        ✕
+                    </button>
+                `;
+                container.appendChild(postCard);
+            });
+        }
+
+        window.addPost = function() {
+            const input = document.getElementById('post-input');
+            const postText = input.value.trim();
+            if (!postText) return;
+
+            globalPosts.push({ text: postText });
+            set(postsRef, globalPosts);
+            input.value = '';
+        }
+
+        window.deletePost = function(index) {
+            globalPosts.splice(index, 1);
+            set(postsRef, globalPosts);
+        }
+
+        // Interactive key interceptors
         document.getElementById('grocery-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') window.addItem();
+        });
+        document.getElementById('post-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.addPost();
         });
     </script>
 </body>
