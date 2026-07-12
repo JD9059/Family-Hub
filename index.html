@@ -6,10 +6,9 @@
     <title>Family Hub Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Custom scrollbar behavior for a cleaner look */
-        .custom-scroll::-webkit-scrollbar { width: 6px; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6">
@@ -73,7 +72,7 @@
             </div>
 
             <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[444px]">
-                <h2 class="text-lg font-semibold mb-3 text-white">📌 Family Fridge Notes</h2>
+                <h2 class="text-lg font-semibold mb-3 text-white">📌 Family Fridge Notes <span class="text-xs font-normal text-slate-400 ml-2">(Click note to edit)</span></h2>
                 
                 <div class="flex gap-2 mb-4">
                     <input type="text" id="post-input" placeholder="Pin a new post-it note..." 
@@ -96,15 +95,15 @@
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
         const firebaseConfig = {
-          apiKey: "AIzaSyDhXXDOIpSLhZj6l6lNOYI5x1TEs6HA5fw",
-          authDomain: "family-hub-7d2b2.firebaseapp.com",
-          databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com",
-          projectId: "family-hub-7d2b2",
-          storageBucket: "family-hub-7d2b2.firebasestorage.app",
-          messagingSenderId: "528172577034",
-          appId: "1:528172577034:web:ca48f878d8ed0dc2854af3"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "family-hub-7d2b2.firebaseapp.com",
+            databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com/",
+            projectId: "family-hub-7d2b2",
+            storageBucket: "family-hub-7d2b2.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
@@ -120,7 +119,6 @@
         let globalItems = [];
         let globalPosts = [];
 
-        // Post-it style variations (Tailwind color matching + slight rotation variations)
         const postItStyles = [
             { bg: 'bg-amber-100 text-amber-900 shadow-amber-900/20', tilt: 'rotate-1' },
             { bg: 'bg-sky-100 text-sky-900 shadow-sky-900/20', tilt: '-rotate-1' },
@@ -181,7 +179,7 @@
             set(groceryRef, globalItems); 
         }
 
-        // ----------------- POST-IT NOTICE BOARD LOGIC -----------------
+        // ----------------- EDITABLE POST-IT LOGIC -----------------
         onValue(postsRef, (snapshot) => {
             globalPosts = snapshot.val() || [];
             renderPosts();
@@ -192,19 +190,26 @@
             container.innerHTML = '';
 
             globalPosts.forEach((post, index) => {
-                // Determine style sequentially using the index pattern
                 const style = postItStyles[index % postItStyles.length];
-
                 const postCard = document.createElement('div');
-                // Build a square aspect-ratio card with soft paper edges
-                postCard.className = `${style.bg} ${style.tilt} aspect-square p-4 shadow-md rounded-sm flex flex-col justify-between transform hover:scale-105 hover:rotate-0 transition-all duration-200 relative group`;
+                postCard.className = `${style.bg} ${style.tilt} aspect-square p-3 shadow-md rounded-sm flex flex-col justify-between transform hover:scale-105 hover:rotate-0 transition-all duration-200 relative group`;
                 
+                // Using a textarea element allows direct inline editing on click
                 postCard.innerHTML = `
-                    <p class="text-sm font-medium tracking-wide font-sans overflow-y-auto custom-scroll pr-1 break-words max-h-[85%]">${post.text}</p>
+                    <textarea class="w-full h-[85%] bg-transparent border-0 resize-none outline-none text-sm font-medium tracking-wide font-sans focus:ring-0 p-0 custom-scroll"
+                              placeholder="Empty note...">${post.text}</textarea>
                     <button onclick="window.deletePost(${index})" class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 bg-black/10 hover:bg-black/20 text-current text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center transition-all">
                         ✕
                     </button>
                 `;
+
+                // Listen for changes inside the text box and sync changes back to cloud
+                const textarea = postCard.querySelector('textarea');
+                textarea.addEventListener('input', (e) => {
+                    globalPosts[index].text = e.target.value;
+                    set(postsRef, globalPosts);
+                });
+
                 container.appendChild(postCard);
             });
         }
@@ -224,7 +229,6 @@
             set(postsRef, globalPosts);
         }
 
-        // Interactive key interceptors
         document.getElementById('grocery-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') window.addItem();
         });
