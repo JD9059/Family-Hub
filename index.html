@@ -194,7 +194,6 @@
                 const postCard = document.createElement('div');
                 postCard.className = `${style.bg} ${style.tilt} aspect-square p-3 shadow-md rounded-sm flex flex-col justify-between transform hover:scale-105 hover:rotate-0 transition-all duration-200 relative group`;
                 
-                // Using a textarea element allows direct inline editing on click
                 postCard.innerHTML = `
                     <textarea class="w-full h-[85%] bg-transparent border-0 resize-none outline-none text-sm font-medium tracking-wide font-sans focus:ring-0 p-0 custom-scroll"
                               placeholder="Empty note...">${post.text}</textarea>
@@ -203,16 +202,16 @@
                     </button>
                 `;
 
-                // Listen for changes inside the text box and sync changes back to cloud
                 const textarea = postCard.querySelector('textarea');
-                textarea.addEventListener('input', (e) => {
+                
+                // FIXED: Changed 'input' to 'blur' so it updates ONLY when you click away
+                textarea.addEventListener('blur', (e) => {
                     globalPosts[index].text = e.target.value;
                     set(postsRef, globalPosts);
                 });
-
-                container.appendChild(postCard);
             });
         }
+        
 
         window.addPost = function() {
             const input = document.getElementById('post-input');
