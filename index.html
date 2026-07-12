@@ -63,11 +63,11 @@
             
             <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[280px]">
                 <h2 class="text-lg font-semibold mb-3 text-white">📅 Family Schedule</h2>
-                <div class="w-full flex-1 bg-slate-900 rounded-xl overflow-hidden border border-slate-700">
-                    <iframe src="https://tockify.com/em/demo/agenda" 
-                            class="w-full h-full border-0" 
-                            style="color-scheme: dark;">
-                    </iframe>
+                <div class="w-full flex-1 bg-slate-900 rounded-xl p-2 overflow-y-auto border border-slate-700">
+                    
+                    <div data-tockify-component="mini" data-tockify-calendar="jd2195"></div>
+                    <script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>
+                    
                 </div>
             </div>
 
