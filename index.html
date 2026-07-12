@@ -184,7 +184,6 @@
             globalPosts = snapshot.val() || [];
             renderPosts();
         });
-
         function renderPosts() {
             const container = document.getElementById('posts-container');
             container.innerHTML = '';
@@ -204,11 +203,14 @@
 
                 const textarea = postCard.querySelector('textarea');
                 
-                // FIXED: Changed 'input' to 'blur' so it updates ONLY when you click away
+                // Updates Firebase only when you click away from the note
                 textarea.addEventListener('blur', (e) => {
                     globalPosts[index].text = e.target.value;
                     set(postsRef, globalPosts);
                 });
+
+                // FIXED: Actually append the card to the dashboard container!
+                container.appendChild(postCard);
             });
         }
         
