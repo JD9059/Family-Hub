@@ -76,59 +76,90 @@
                 <div data-tockify-component="mini" data-tockify-calendar="jd2195"></div>
 <script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>
 
+</div> 
+    </div> <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
+        // 1. Paste YOUR unique Firebase config right here
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT.firebaseio.com",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "...",
+            appId: "..."
+        };
 
-    <!-- Smart Categorization Script -->
-    <script>
-        // Simple keyword engine to sort inputs automatically
+        // 2. Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const dbRef = ref(db, 'groceryList');
+
         const categories = {
             produce: ['apple', 'banana', 'lettuce', 'tomato', 'berry', 'berries', 'lemon', 'lime', 'onion', 'garlic', 'potato', 'avocado', 'salad'],
             dairy: ['milk', 'cheese', 'egg', 'eggs', 'butter', 'yogurt', 'cream', 'sour cream'],
             bakery: ['bread', 'bagel', 'tortilla', 'bun', 'buns', 'croissant', 'muffin']
         };
 
-        function addItem() {
+        let globalItems = [];
+
+        // 3. LISTEN for live cloud updates
+        onValue(dbRef, (snapshot) => {
+            const data = snapshot.val();
+            globalItems = data || [];
+            renderList();
+        });
+
+        function renderList() {
+            ['produce', 'dairy', 'bakery', 'other'].forEach(cat => {
+                document.getElementById(`cat-${cat}`).innerHTML = '';
+            });
+
+            globalItems.forEach((item, index) => {
+                const lowerItem = item.text.toLowerCase();
+                let targetCat = 'other';
+
+                if (categories.produce.some(k => lowerItem.includes(k))) targetCat = 'produce';
+                else if (categories.dairy.some(k => lowerItem.includes(k))) targetCat = 'dairy';
+                else if (categories.bakery.some(k => lowerItem.includes(k))) targetCat = 'bakery';
+
+                const container = document.getElementById(`cat-${targetCat}`);
+                const itemRow = document.createElement('label');
+                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
+                
+                itemRow.innerHTML = `
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
+                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
+                `;
+
+                itemRow.querySelector('input').addEventListener('change', (e) => {
+                    globalItems[index].checked = e.target.checked;
+                    set(dbRef, globalItems); 
+                });
+
+                container.appendChild(itemRow);
+            });
+        }
+
+        window.addItem = function() {
             const input = document.getElementById('grocery-input');
             const itemText = input.value.trim();
             if (!itemText) return;
 
-            const lowerItem = itemText.toLowerCase();
-            let targetCat = 'other';
-
-            // Determine correct smart bucket
-            if (categories.produce.some(k => lowerItem.includes(k))) targetCat = 'produce';
-            else if (categories.dairy.some(k => lowerItem.includes(k))) targetCat = 'dairy';
-            else if (categories.bakery.some(k => lowerItem.includes(k))) targetCat = 'bakery';
-
-            const container = document.getElementById(`cat-${targetCat}`);
-            
-            // Build checkout item element
-            const itemRow = document.createElement('label');
-            itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
-            itemRow.innerHTML = `
-                <input type="checkbox" class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800 tracking-item">
-                <span class="text-sm text-slate-300 group-hover:text-white transition-colors">${itemText}</span>
-            `;
-
-            // Setup line-through toggle behavior when checked
-            const checkbox = itemRow.querySelector('input');
-            checkbox.addEventListener('change', () => {
-                itemRow.querySelector('span').classList.toggle('line-through', checkbox.checked);
-                itemRow.querySelector('span').classList.toggle('text-slate-500', checkbox.checked);
-            });
-
-            container.appendChild(itemRow);
+            globalItems.push({ text: itemText, checked: false });
+            set(dbRef, globalItems); 
             input.value = '';
         }
 
-        function clearChecked() {
-            const checkedBoxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            checkedBoxes.forEach(box => box.closest('label').remove());
+        window.clearChecked = function() {
+            globalItems = globalItems.filter(item => !item.checked);
+            set(dbRef, globalItems); 
         }
 
-        // Allow pressing "Enter" key to add items smoothly
         document.getElementById('grocery-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') addItem();
+            if (e.key === 'Enter') window.addItem();
         });
     </script>
 </body>
