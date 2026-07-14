@@ -4,36 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Family Hub Dashboard</title>
+    <!-- Tailwind CSS for styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-track { background: transparent; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
-    </style>
 </head>
 <body class="bg-slate-900 text-slate-100 min-h-screen p-6">
 
+    <!-- Header -->
     <header class="mb-8 text-center md:text-left">
         <h1 class="text-3xl font-bold tracking-tight text-white">Our Family Hub</h1>
-        <p class="text-slate-400">Smart Grocery List & Shared Space</p>
+        <p class="text-slate-400">Smart Groceries & Miller Beach Packing Planner</p>
     </header>
 
+    <!-- Main Grid Layout (Symmetrical 50/50 Split on Large Screens) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
-        <div class="lg:col-span-5 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col justify-between">
+        <!-- LEFT PANEL: Smart Grocery List (Spans 6 columns) -->
+        <div class="lg:col-span-6 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col justify-between min-h-[600px]">
             <div>
                 <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
                     🛒 Smart Grocery List
                 </h2>
                 
+                <!-- Grocery Quick Add Input -->
                 <div class="flex gap-2 mb-6">
-                    <input type="text" id="grocery-input" placeholder="Add any item (e.g., Milk, Apples, Bread)..." 
+                    <input type="text" id="grocery-input" placeholder="Add grocery item (e.g., Milk, Apples, Bread)..." 
                            class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="window.addItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
+                    <button onclick="window.addGroceryItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
                         Add
                     </button>
                 </div>
 
+                <!-- Grocery Auto-Categorized Sections -->
                 <div class="space-y-4">
                     <div>
                         <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">🥦 Produce</h3>
@@ -49,47 +50,63 @@
                     </div>
                     <div>
                         <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">📦 Everything Else</h3>
-                        <div id="cat-other" class="space-y-1 text-slate-300"></div>
+                        <div id="cat-grocery-other" class="space-y-1 text-slate-300"></div>
                     </div>
                 </div>
             </div>
 
-            <button onclick="window.clearChecked()" class="mt-6 w-full py-2 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
-                Clear Checked Items
+            <!-- Clear Groceries Action -->
+            <button onclick="window.clearCheckedGroceries()" class="mt-6 w-full py-2.5 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
+                Clear Checked Groceries
             </button>
         </div>
 
-        <div class="lg:col-span-7 flex flex-col gap-6">
-            
-            <div class="bg-slate-800 p-5 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[280px]">
-                <h2 class="text-lg font-semibold mb-3 text-white">📅 Family Schedule</h2>
-                <div class="w-full flex-1 bg-slate-900 rounded-xl p-2 overflow-y-auto border border-slate-700">
-                    
-                    <div data-tockify-component="mini" data-tockify-calendar="jd2195"></div>
-                    <script data-cfasync="false" data-tockify-script="embed" src="https://public.tockify.com/browser/embed.js"></script>
-                    
-                </div>
-            </div>
-
-            <div class="bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col h-[444px]">
-                <h2 class="text-lg font-semibold mb-3 text-white">📌 Family Fridge Notes <span class="text-xs font-normal text-slate-400 ml-2">(Click note to edit)</span></h2>
+        <!-- RIGHT PANEL: Miller Beach Packing List (Spans 6 columns) -->
+        <div class="lg:col-span-6 bg-slate-800 p-6 rounded-2xl shadow-xl border border-slate-700 flex flex-col justify-between min-h-[600px]">
+            <div>
+                <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                    🏖️ Miller Beach Packing List
+                </h2>
                 
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="post-input" placeholder="Pin a new post-it note..." 
-                           class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    <button onclick="window.addPost()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl text-sm transition-colors shadow-md">
-                        Pin Note
+                <!-- Beach List Quick Add Input -->
+                <div class="flex gap-2 mb-6">
+                    <input type="text" id="beach-input" placeholder="Add packing item (e.g., Towels, Cooler, Sunscreen)..." 
+                           class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <button onclick="window.addBeachItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
+                        Add
                     </button>
                 </div>
 
-                <div id="posts-container" class="flex-1 overflow-y-auto custom-scroll grid grid-cols-2 md:grid-cols-3 gap-4 p-2 bg-slate-900/40 rounded-xl border border-slate-700/50">
+                <!-- Beach List Auto-Categorized Sections -->
+                <div class="space-y-4">
+                    <div>
+                        <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-2">🕶️ Beach Gear</h3>
+                        <div id="cat-gear" class="space-y-1 text-slate-300"></div>
                     </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-fuchsia-400 uppercase tracking-wider mb-2">🩲 Swim & Clothes</h3>
+                        <div id="cat-clothing" class="space-y-1 text-slate-300"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-yellow-400 uppercase tracking-wider mb-2">🍹 Food & Drinks</h3>
+                        <div id="cat-food" class="space-y-1 text-slate-300"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">☀️ Sun & Safety</h3>
+                        <div id="cat-beach-other" class="space-y-1 text-slate-300"></div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Clear Beach Action -->
+            <button onclick="window.clearCheckedBeach()" class="mt-6 w-full py-2.5 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
+                Clear Checked Packing Items
+            </button>
         </div>
 
     </div>
 
+    <!-- Firebase System Module Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -107,44 +124,44 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         
+        // Setup two distinct database paths
         const groceryRef = ref(db, 'groceryList');
-        const postsRef = ref(db, 'familyPosts');
+        const beachRef = ref(db, 'beachTripList');
 
-        const categories = {
+        // Smart keyword definitions for auto-sorting
+        const groceryCategories = {
             produce: ['apple', 'banana', 'lettuce', 'tomato', 'berry', 'berries', 'lemon', 'lime', 'onion', 'garlic', 'potato', 'avocado', 'salad'],
             dairy: ['milk', 'cheese', 'egg', 'eggs', 'butter', 'yogurt', 'cream', 'sour cream'],
             bakery: ['bread', 'bagel', 'tortilla', 'bun', 'buns', 'croissant', 'muffin']
         };
 
-        let globalItems = [];
-        let globalPosts = [];
+        const beachCategories = {
+            gear: ['umbrella', 'chair', 'chairs', 'towel', 'towels', 'cooler', 'wagon', 'canopy', 'blanket', 'tent', 'kite', 'speaker', 'toys', 'frisbee'],
+            clothing: ['swimsuit', 'swim', 'suit', 'bikini', 'trunks', 'sandals', 'flip flops', 'sunglasses', 'hat', 'hoodie', 'sweatshirt', 'shorts', 'hoodies', 'jacket'],
+            food: ['snack', 'snacks', 'drink', 'water', 'ice', "s'mores", 'marshmallows', 'hot dogs', 'beer', 'wine', 'seltzer', 'juice', 'fruit', 'food']
+        };
 
-        const postItStyles = [
-            { bg: 'bg-amber-100 text-amber-900 shadow-amber-900/20', tilt: 'rotate-1' },
-            { bg: 'bg-sky-100 text-sky-900 shadow-sky-900/20', tilt: '-rotate-1' },
-            { bg: 'bg-emerald-100 text-emerald-900 shadow-emerald-900/20', tilt: 'rotate-2' },
-            { bg: 'bg-rose-100 text-rose-900 shadow-rose-900/20', tilt: '-rotate-2' },
-            { bg: 'bg-purple-100 text-purple-900 shadow-purple-900/20', tilt: 'rotate-1' }
-        ];
+        let globalGroceries = [];
+        let globalBeachItems = [];
 
-        // ----------------- GROCERY LOGIC -----------------
+        // ----------------- GROCERY LIST FUNCTIONALITY -----------------
         onValue(groceryRef, (snapshot) => {
-            globalItems = snapshot.val() || [];
-            renderList();
+            globalGroceries = snapshot.val() || [];
+            renderGroceryList();
         });
 
-        function renderList() {
-            ['produce', 'dairy', 'bakery', 'other'].forEach(cat => {
+        function renderGroceryList() {
+            ['produce', 'dairy', 'bakery', 'grocery-other'].forEach(cat => {
                 document.getElementById(`cat-${cat}`).innerHTML = '';
             });
 
-            globalItems.forEach((item, index) => {
+            globalGroceries.forEach((item, index) => {
                 const lowerItem = item.text.toLowerCase();
-                let targetCat = 'other';
+                let targetCat = 'grocery-other';
 
-                if (categories.produce.some(k => lowerItem.includes(k))) targetCat = 'produce';
-                else if (categories.dairy.some(k => lowerItem.includes(k))) targetCat = 'dairy';
-                else if (categories.bakery.some(k => lowerItem.includes(k))) targetCat = 'bakery';
+                if (groceryCategories.produce.some(k => lowerItem.includes(k))) targetCat = 'produce';
+                else if (groceryCategories.dairy.some(k => lowerItem.includes(k))) targetCat = 'dairy';
+                else if (groceryCategories.bakery.some(k => lowerItem.includes(k))) targetCat = 'bakery';
 
                 const container = document.getElementById(`cat-${targetCat}`);
                 const itemRow = document.createElement('label');
@@ -156,85 +173,89 @@
                 `;
 
                 itemRow.querySelector('input').addEventListener('change', (e) => {
-                    globalItems[index].checked = e.target.checked;
-                    set(groceryRef, globalItems); 
+                    globalGroceries[index].checked = e.target.checked;
+                    set(groceryRef, globalGroceries); 
                 });
 
                 container.appendChild(itemRow);
             });
         }
 
-        window.addItem = function() {
+        window.addGroceryItem = function() {
             const input = document.getElementById('grocery-input');
             const itemText = input.value.trim();
             if (!itemText) return;
 
-            globalItems.push({ text: itemText, checked: false });
-            set(groceryRef, globalItems); 
+            globalGroceries.push({ text: itemText, checked: false });
+            set(groceryRef, globalGroceries); 
             input.value = '';
         }
 
-        window.clearChecked = function() {
-            globalItems = globalItems.filter(item => !item.checked);
-            set(groceryRef, globalItems); 
+        window.clearCheckedGroceries = function() {
+            globalGroceries = globalGroceries.filter(item => !item.checked);
+            set(groceryRef, globalGroceries); 
         }
 
-        // ----------------- EDITABLE POST-IT LOGIC -----------------
-        onValue(postsRef, (snapshot) => {
-            globalPosts = snapshot.val() || [];
-            renderPosts();
-        });
-        function renderPosts() {
-            const container = document.getElementById('posts-container');
-            container.innerHTML = '';
 
-            globalPosts.forEach((post, index) => {
-                const style = postItStyles[index % postItStyles.length];
-                const postCard = document.createElement('div');
-                postCard.className = `${style.bg} ${style.tilt} aspect-square p-3 shadow-md rounded-sm flex flex-col justify-between transform hover:scale-105 hover:rotate-0 transition-all duration-200 relative group`;
+        // ----------------- MILLER BEACH TRIP FUNCTIONALITY -----------------
+        onValue(beachRef, (snapshot) => {
+            globalBeachItems = snapshot.val() || [];
+            renderBeachList();
+        });
+
+        function renderBeachList() {
+            ['gear', 'clothing', 'food', 'beach-other'].forEach(cat => {
+                document.getElementById(`cat-${cat}`).innerHTML = '';
+            });
+
+            globalBeachItems.forEach((item, index) => {
+                const lowerItem = item.text.toLowerCase();
+                let targetCat = 'beach-other';
+
+                if (beachCategories.gear.some(k => lowerItem.includes(k))) targetCat = 'gear';
+                else if (beachCategories.clothing.some(k => lowerItem.includes(k))) targetCat = 'clothing';
+                else if (beachCategories.food.some(k => lowerItem.includes(k))) targetCat = 'food';
+
+                const container = document.getElementById(`cat-${targetCat}`);
+                const itemRow = document.createElement('label');
+                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
                 
-                postCard.innerHTML = `
-                    <textarea class="w-full h-[85%] bg-transparent border-0 resize-none outline-none text-sm font-medium tracking-wide font-sans focus:ring-0 p-0 custom-scroll"
-                              placeholder="Empty note...">${post.text}</textarea>
-                    <button onclick="window.deletePost(${index})" class="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 bg-black/10 hover:bg-black/20 text-current text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center transition-all">
-                        ✕
-                    </button>
+                itemRow.innerHTML = `
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
+                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
                 `;
 
-                const textarea = postCard.querySelector('textarea');
-                
-                // Updates Firebase only when you click away from the note
-                textarea.addEventListener('blur', (e) => {
-                    globalPosts[index].text = e.target.value;
-                    set(postsRef, globalPosts);
+                itemRow.querySelector('input').addEventListener('change', (e) => {
+                    globalBeachItems[index].checked = e.target.checked;
+                    set(beachRef, globalBeachItems); 
                 });
 
-                // FIXED: Actually append the card to the dashboard container!
-                container.appendChild(postCard);
+                container.appendChild(itemRow);
             });
         }
-        
 
-        window.addPost = function() {
-            const input = document.getElementById('post-input');
-            const postText = input.value.trim();
-            if (!postText) return;
+        window.addBeachItem = function() {
+            const input = document.getElementById('beach-input');
+            const itemText = input.value.trim();
+            if (!itemText) return;
 
-            globalPosts.push({ text: postText });
-            set(postsRef, globalPosts);
+            globalBeachItems.push({ text: itemText, checked: false });
+            set(beachRef, globalBeachItems); 
             input.value = '';
         }
 
-        window.deletePost = function(index) {
-            globalPosts.splice(index, 1);
-            set(postsRef, globalPosts);
+        window.clearCheckedBeach = function() {
+            globalBeachItems = globalBeachItems.filter(item => !item.checked);
+            set(beachRef, globalBeachItems); 
         }
 
+
+        // Global Key Interceptors (Enter Key to submit inputs)
         document.getElementById('grocery-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') window.addItem();
+            if (e.key === 'Enter') window.addGroceryItem();
         });
-        document.getElementById('post-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') window.addPost();
+        document.getElementById('beach-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.addBeachItem();
         });
     </script>
 </body>
