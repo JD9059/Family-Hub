@@ -140,9 +140,10 @@
         };
 
         const beachCategories = {
-            gear: ['umbrella', 'chair', 'chairs', 'towel', 'towels', 'cooler', 'wagon', 'canopy', 'blanket', 'tent', 'kite', 'speaker', 'toys', 'frisbee'],
+            gear: ['umbrella', 'chair', 'chairs', 'towel', 'towels', 'cooler', 'wagon', 'canopy', 'blanket', 'tent', 'kite', 'speaker', 'frisbee'],
             clothing: ['swimsuit', 'swim', 'suit', 'bikini', 'trunks', 'sandals', 'flip flops', 'sunglasses', 'hat', 'hoodie', 'sweatshirt', 'shorts', 'hoodies', 'jacket'],
-            food: ['snack', 'snacks', 'drink', 'water', 'ice', "s'mores", 'marshmallows', 'hot dogs', 'beer', 'wine', 'seltzer', 'juice', 'fruit', 'food']
+            food: ['snack', 'snacks', 'drink', 'water', 'ice', "s'mores", 'marshmallows', 'hot dogs', 'beer', 'wine', 'seltzer', 'juice', 'fruit'],
+            cola: ['cola', 'dog', 'pup', 'leash', 'harness', 'treats', 'kibble', 'poop bags', 'crate', 'dog food', 'dog bowl', 'collar', 'vest', 'chew']
         };
 
         let globalGroceries = [];
@@ -207,8 +208,8 @@
             renderBeachList();
         });
 
-        function renderBeachList() {
-            ['gear', 'clothing', 'food', 'beach-other'].forEach(cat => {
+            function renderBeachList() {
+            ['gear', 'clothing', 'food', 'cola', 'beach-other'].forEach(cat => {
                 document.getElementById(`cat-${cat}`).innerHTML = '';
             });
 
@@ -219,6 +220,7 @@
                 if (beachCategories.gear.some(k => lowerItem.includes(k))) targetCat = 'gear';
                 else if (beachCategories.clothing.some(k => lowerItem.includes(k))) targetCat = 'clothing';
                 else if (beachCategories.food.some(k => lowerItem.includes(k))) targetCat = 'food';
+                else if (beachCategories.cola.some(k => lowerItem.includes(k))) targetCat = 'cola';
 
                 const container = document.getElementById(`cat-${targetCat}`);
                 const itemRow = document.createElement('label');
