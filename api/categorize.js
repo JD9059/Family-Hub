@@ -13,29 +13,18 @@ export default async function handler(req, res) {
         const { itemText, listType } = req.body;
 
         const prompt = `
-            You are a smart family hub assistant. Parse and categorize the user input for a "${listType}" list.
+            You are a smart family hub assistant. Parse and categorize user input for a "${listType}" list.
             Input text: "${itemText}"
 
             Rules:
             1. Extract distinct items if multiple items are mentioned in one line.
-            2. For each item, refine the label to be clean and title-case (e.g., "get some lowfat milk" -> "Lowfat Milk", "Cola's leash and harness" -> "Leash & Harness").
-            3. Choose the best matching category from this list based on listType:
+            2. Clean up item labels to be concise and title-cased.
+            3. Dynamically assign a clean, emoji-prefixed category name to each item based on list context.
+               - For grocery list: "🥦 Produce", "🥛 Dairy & Eggs", "🍞 Bakery & Grains", "🥩 Meat & Seafood", "📦 Pantry & Snacks", etc.
+               - For beach list: "🕶️ Beach Gear", "🩲 Swim & Apparel", "🍹 Food & Drinks", "🐶 Cola's Essentials", "☀️ Sun & Safety", etc.
 
-            If listType is "grocery":
-            - "produce": Fruits, vegetables, herbs, fresh salads
-            - "dairy": Milk, eggs, cheese, butter, yogurt, cream
-            - "bakery": Bread, bagels, tortillas, buns, muffins
-            - "grocery-other": Everything else
-
-            If listType is "beach":
-            - "gear": Beach towels, chairs, umbrellas, coolers, wagons, toys, speakers
-            - "clothing": Swimsuits, trunks, flip flops, hats, sunglasses, hoodies for lake nights
-            - "food": Snacks, drinks, water, s'mores ingredients, hot dogs, seltzers, ice
-            - "cola": Anything related to Cola the dog (leash, kibble, dog treats, bowls, toys)
-            - "beach-other": Everything else
-
-            Respond ONLY with a JSON object structured like this:
-            {"items": [{"text": "Cleaned Item Name", "category": "category-key"}]}
+            Respond ONLY with a valid JSON object:
+            {"items": [{"text": "Cleaned Item Name", "category": "Emoji Category Name"}]}
         `;
 
         const response = await openai.chat.completions.create({
@@ -48,7 +37,7 @@ export default async function handler(req, res) {
         });
 
         const rawJson = JSON.parse(response.choices[0].message.content.trim());
-        const items = rawJson.items || Array.isArray(rawJson) ? rawJson : Object.values(rawJson)[0];
+        const items = rawJson.items || (Array.isArray(rawJson) ? rawJson : Object.values(rawJson)[0]);
 
         return res.status(200).json({ items });
     } catch (error) {
