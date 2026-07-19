@@ -87,54 +87,83 @@
         const groceryRef = ref(db, 'groceryList');
         const beachRef = ref(db, 'beachTripList');
 
-
-        // ----------------- GROCERY LIST FUNCTIONALITY -----------------
+// ----------------- GROCERY LIST FUNCTIONALITY -----------------
         onValue(groceryRef, (snapshot) => {
             globalGroceries = snapshot.val() || [];
             renderGroceryList();
         });
-    function renderGroceryList() {
-        ['produce', 'dairy', 'bakery', 'grocery-other'].forEach(cat => {
-        const el = document.getElementById(`cat-${cat}`);
-        if (el) el.innerHTML = '';
-    });
 
-        globalGroceries.forEach((item, index) => {
-            const targetCat = item.category || 'grocery-other';
-            const container = document.getElementById(`cat-${targetCat}`) || document.getElementById('cat-grocery-other');
+        function renderGroceryList() {
+            ['produce', 'dairy', 'bakery', 'grocery-other'].forEach(cat => {
+                const el = document.getElementById(`cat-${cat}`);
+                if (el) el.innerHTML = '';
+            });
 
-            const itemRow = document.createElement('label');
-            itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
-        
-            itemRow.innerHTML = `
-            <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
-            <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
-        `;
+            globalGroceries.forEach((item, index) => {
+                const targetCat = item.category || 'grocery-other';
+                const container = document.getElementById(`cat-${targetCat}`) || document.getElementById('cat-grocery-other');
 
-            itemRow.querySelector('input').addEventListener('change', (e) => {
-            globalGroceries[index].checked = e.target.checked;
-            set(groceryRef, globalGroceries); 
-        });
+                const itemRow = document.createElement('label');
+                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
+                
+                itemRow.innerHTML = `
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
+                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
+                `;
 
-        if (container) container.appendChild(itemRow);
-    });
-}
-        window.addGroceryItem = function() {
+                itemRow.querySelector('input').addEventListener('change', (e) => {
+                    globalGroceries[index].checked = e.target.checked;
+                    set(groceryRef, globalGroceries); 
+                });
+
+                if (container) container.appendChild(itemRow);
+            });
+        }
+
+        window.addGroceryItem = async function() {
             const input = document.getElementById('grocery-input');
             const itemText = input.value.trim();
             if (!itemText) return;
 
-            globalGroceries.push({ text: itemText, checked: false });
-            set(groceryRef, globalGroceries); 
-            input.value = '';
-        }
+            input.value = 'AI sorting...';
+            input.disabled = true;
+
+            try {
+                const res = await fetch('/api/categorize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ itemText: itemText, listType: 'grocery' })
+                });
+
+                const data = await res.json();
+                
+                if (data.items && data.items.length) {
+                    data.items.forEach(item => {
+                        globalGroceries.push({ 
+                            text: item.text, 
+                            category: item.category, 
+                            checked: false 
+                        });
+                    });
+                    set(groceryRef, globalGroceries);
+                }
+            } catch (err) {
+                console.error('API Error, falling back to basic item:', err);
+                // Fallback: If API fails, save to default category
+                globalGroceries.push({ text: itemText, category: 'grocery-other', checked: false });
+                set(groceryRef, globalGroceries);
+            } finally {
+                input.value = '';
+                input.disabled = false;
+                input.focus();
+            }
+        };
 
         window.clearCheckedGroceries = function() {
             globalGroceries = globalGroceries.filter(item => !item.checked);
             set(groceryRef, globalGroceries); 
-        }
-
-
+        };
+       
         // ----------------- MILLER BEACH TRIP FUNCTIONALITY -----------------
         onValue(beachRef, (snapshot) => {
             globalBeachItems = snapshot.val() || [];
