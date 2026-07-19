@@ -148,38 +148,32 @@
             globalGroceries = snapshot.val() || [];
             renderGroceryList();
         });
+    function renderGroceryList() {
+        ['produce', 'dairy', 'bakery', 'grocery-other'].forEach(cat => {
+        const el = document.getElementById(`cat-${cat}`);
+        if (el) el.innerHTML = '';
+    });
 
-        function renderGroceryList() {
-            ['produce', 'dairy', 'bakery', 'grocery-other'].forEach(cat => {
-                document.getElementById(`cat-${cat}`).innerHTML = '';
-            });
+        globalGroceries.forEach((item, index) => {
+            const targetCat = item.category || 'grocery-other';
+            const container = document.getElementById(`cat-${targetCat}`) || document.getElementById('cat-grocery-other');
 
-            globalGroceries.forEach((item, index) => {
-                const lowerItem = item.text.toLowerCase();
-                let targetCat = 'grocery-other';
+            const itemRow = document.createElement('label');
+            itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
+        
+            itemRow.innerHTML = `
+            <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
+            <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
+        `;
 
-                if (groceryCategories.produce.some(k => lowerItem.includes(k))) targetCat = 'produce';
-                else if (groceryCategories.dairy.some(k => lowerItem.includes(k))) targetCat = 'dairy';
-                else if (groceryCategories.bakery.some(k => lowerItem.includes(k))) targetCat = 'bakery';
+            itemRow.querySelector('input').addEventListener('change', (e) => {
+            globalGroceries[index].checked = e.target.checked;
+            set(groceryRef, globalGroceries); 
+        });
 
-                const container = document.getElementById(`cat-${targetCat}`);
-                const itemRow = document.createElement('label');
-                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
-                
-                itemRow.innerHTML = `
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
-                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
-                `;
-
-                itemRow.querySelector('input').addEventListener('change', (e) => {
-                    globalGroceries[index].checked = e.target.checked;
-                    set(groceryRef, globalGroceries); 
-                });
-
-                container.appendChild(itemRow);
-            });
-        }
-
+        if (container) container.appendChild(itemRow);
+    });
+}
         window.addGroceryItem = function() {
             const input = document.getElementById('grocery-input');
             const itemText = input.value.trim();
@@ -204,36 +198,31 @@
 
             function renderBeachList() {
             ['gear', 'clothing', 'food', 'cola', 'beach-other'].forEach(cat => {
-                document.getElementById(`cat-${cat}`).innerHTML = '';
+            const el = document.getElementById(`cat-${cat}`);
+            if (el) el.innerHTML = '';
             });
 
             globalBeachItems.forEach((item, index) => {
-                const lowerItem = item.text.toLowerCase();
-                let targetCat = 'beach-other';
+                const targetCat = item.category || 'beach-other';
+                const container = document.getElementById(`cat-${targetCat}`) || document.getElementById('cat-beach-other');
 
-                if (beachCategories.gear.some(k => lowerItem.includes(k))) targetCat = 'gear';
-                else if (beachCategories.clothing.some(k => lowerItem.includes(k))) targetCat = 'clothing';
-                else if (beachCategories.food.some(k => lowerItem.includes(k))) targetCat = 'food';
-                else if (beachCategories.cola.some(k => lowerItem.includes(k))) targetCat = 'cola';
-
-                const container = document.getElementById(`cat-${targetCat}`);
                 const itemRow = document.createElement('label');
-                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
-                
-                itemRow.innerHTML = `
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
-                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
-                `;
+            itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
+        
+            itemRow.innerHTML = `
+                <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
+                <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
+        `;
 
-                itemRow.querySelector('input').addEventListener('change', (e) => {
-                    globalBeachItems[index].checked = e.target.checked;
-                    set(beachRef, globalBeachItems); 
-                });
-
-                container.appendChild(itemRow);
+            itemRow.querySelector('input').addEventListener('change', (e) => {
+                globalBeachItems[index].checked = e.target.checked;
+                set(beachRef, globalBeachItems); 
             });
-        }
 
+        if (container) container.appendChild(itemRow);
+    });
+}
+        
         window.addBeachItem = function() {
             const input = document.getElementById('beach-input');
             const itemText = input.value.trim();
@@ -248,7 +237,6 @@
             globalBeachItems = globalBeachItems.filter(item => !item.checked);
             set(beachRef, globalBeachItems); 
         }
-
 
         // Global Key Interceptors (Enter Key to submit inputs)
         document.getElementById('grocery-input').addEventListener('keypress', (e) => {
