@@ -34,27 +34,6 @@
                     </button>
                 </div>
 
-                <!-- Grocery Auto-Categorized Sections -->
-                <div class="space-y-4">
-                    <div>
-                        <h3 class="text-sm font-semibold text-emerald-400 uppercase tracking-wider mb-2">🥦 Produce</h3>
-                        <div id="cat-produce" class="space-y-1 text-slate-300"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-blue-400 uppercase tracking-wider mb-2">🥛 Dairy / Cold</h3>
-                        <div id="cat-dairy" class="space-y-1 text-slate-300"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-amber-400 uppercase tracking-wider mb-2">🍞 Bakery / Grains</h3>
-                        <div id="cat-bakery" class="space-y-1 text-slate-300"></div>
-                    </div>
-                    <div>
-                        <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">📦 Everything Else</h3>
-                        <div id="cat-grocery-other" class="space-y-1 text-slate-300"></div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Clear Groceries Action -->
             <button onclick="window.clearCheckedGroceries()" class="mt-6 w-full py-2.5 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
                 Clear Checked Groceries
@@ -77,24 +56,6 @@
                     </button>
                 </div>
 
-                <!-- Beach List Auto-Categorized Sections -->
-            <div class="space-y-4">
-                <div>
-                    <h3 class="text-sm font-semibold text-sky-400 uppercase tracking-wider mb-2">🕶️ Beach Gear</h3>
-                    <div id="cat-gear" class="space-y-1 text-slate-300"></div> </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-fuchsia-400 uppercase tracking-wider mb-2">🩲 Swim & Clothes</h3>
-                    <div id="cat-clothing" class="space-y-1 text-slate-300"></div> </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-yellow-400 uppercase tracking-wider mb-2">🍹 Food & Drinks</h3>
-                    <div id="cat-food" class="space-y-1 text-slate-300"></div> </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-orange-400 uppercase tracking-wider mb-2">🐶 Cola's Essentials</h3>
-                    <div id="cat-cola" class="space-y-1 text-slate-300"></div> </div>
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-2">☀️ Sun & Safety</h3>
-                    <div id="cat-beach-other" class="space-y-1 text-slate-300"></div> </div>
-            </div>
 
             <!-- Clear Beach Action -->
             <button onclick="window.clearCheckedBeach()" class="mt-6 w-full py-2.5 bg-slate-700 hover:bg-slate-650 text-slate-300 text-sm font-medium rounded-xl transition-colors">
@@ -126,22 +87,6 @@
         const groceryRef = ref(db, 'groceryList');
         const beachRef = ref(db, 'beachTripList');
 
-        // Smart keyword definitions for auto-sorting
-        const groceryCategories = {
-            produce: ['apple', 'banana', 'lettuce', 'tomato', 'berry', 'berries', 'lemon', 'lime', 'onion', 'garlic', 'potato', 'avocado', 'salad'],
-            dairy: ['milk', 'cheese', 'egg', 'eggs', 'butter', 'yogurt', 'cream', 'sour cream'],
-            bakery: ['bread', 'bagel', 'tortilla', 'bun', 'buns', 'croissant', 'muffin']
-        };
-
-        const beachCategories = {
-            gear: ['umbrella', 'chair', 'chairs', 'towel', 'towels', 'cooler', 'wagon', 'canopy', 'blanket', 'tent', 'kite', 'speaker', 'frisbee'],
-            clothing: ['swimsuit', 'swim', 'suit', 'bikini', 'trunks', 'sandals', 'flip flops', 'sunglasses', 'hat', 'hoodie', 'sweatshirt', 'shorts', 'hoodies', 'jacket'],
-            food: ['snack', 'snacks', 'drink', 'water', 'ice', "s'mores", 'marshmallows', 'hot dogs', 'beer', 'wine', 'seltzer', 'juice', 'fruit'],
-            cola: ['cola', 'dog', 'pup', 'leash', 'harness', 'treats', 'kibble', 'poop bags', 'crate', 'dog food', 'dog bowl', 'collar', 'vest', 'chew']
-        };
-
-        let globalGroceries = [];
-        let globalBeachItems = [];
 
         // ----------------- GROCERY LIST FUNCTIONALITY -----------------
         onValue(groceryRef, (snapshot) => {
