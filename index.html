@@ -26,14 +26,16 @@
                 </h2>
                 
                 <!-- Grocery Quick Add Input -->
-                <div class="flex gap-2 mb-6">
-                    <input type="text" id="grocery-input" placeholder="Add grocery item (e.g., Milk, Apples, Bread)..." 
-                           class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="window.addGroceryItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
-                        Add
-                    </button>
-                </div>
-
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="grocery-input" 
+                   placeholder="Add grocery item (e.g., Milk, Apples, Bread)..." 
+                   onkeydown="if(event.key === 'Enter') window.addGroceryItem()"
+                   class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="window.addGroceryItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
+                Add
+            </button>
+        </div>
+        
                 <!-- DYNAMIC AI CONTAINER (Replaces all old category divs) -->
                 <div id="grocery-items-container" class="space-y-4 overflow-y-auto max-h-[500px]"></div>
            
@@ -54,13 +56,15 @@
                 </h2>
                 
                 <!-- Beach Quick Add Input -->
-                <div class="flex gap-2 mb-6">
-                    <input type="text" id="beach-input" placeholder="Add beach item (e.g., Towels, Cola's treats, Coolers)..." 
-                           class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <button onclick="window.addBeachItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
-                        Add
-                    </button>
-                </div>
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="beach-input" 
+                   placeholder="Add beach item (e.g., Towels, Cola's treats, Coolers)..." 
+                   onkeydown="if(event.key === 'Enter') window.addBeachItem()"
+                   class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="window.addBeachItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
+                Add
+            </button>
+        </div>
 
                 <!-- DYNAMIC AI CONTAINER (Replaces all old category divs) -->
                 <div id="beach-items-container" class="space-y-4 overflow-y-auto max-h-[500px]"></div>
@@ -79,9 +83,16 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // --- YOUR FIREBASE CONFIG HERE ---
-    const firebaseConfig = {
         // ... Keep your existing firebaseConfig object ...
+        const firebaseConfig = {
+          apiKey: "AIzaSyDhXXDOIpSLhZj6l6lNOYI5x1TEs6HA5fw",
+          authDomain: "family-hub-7d2b2.firebaseapp.com",
+          databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com",
+          projectId: "family-hub-7d2b2",
+          storageBucket: "family-hub-7d2b2.firebasestorage.app",
+          messagingSenderId: "528172577034",
+          appId: "1:528172577034:web:ca48f878d8ed0dc2854af3"
+        };
     };
 
     const app = initializeApp(firebaseConfig);
