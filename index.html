@@ -83,8 +83,8 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // ... Keep your existing firebaseConfig object ...
-        const firebaseConfig = {
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = {
           apiKey: "AIzaSyDhXXDOIpSLhZj6l6lNOYI5x1TEs6HA5fw",
           authDomain: "family-hub-7d2b2.firebaseapp.com",
           databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com",
@@ -93,7 +93,6 @@
           messagingSenderId: "528172577034",
           appId: "1:528172577034:web:ca48f878d8ed0dc2854af3"
         };
-    };
 
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
@@ -104,79 +103,10 @@
     let globalGroceries = [];
     let globalBeachItems = [];
 
-    // ----------------- REALTIME LISTENERS -----------------
-    onValue(groceryRef, (snapshot) => {
-        globalGroceries = snapshot.val() || [];
-        renderGroceryList();
-    });
-
-    onValue(beachRef, (snapshot) => {
-        globalBeachItems = snapshot.val() || [];
-        renderBeachList();
-    });
-
-    // ----------------- SHARED DYNAMIC RENDER -----------------
-    function renderDynamicList(itemsArray, containerId, firebaseRef) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-
-        container.innerHTML = '';
-
-        if (!itemsArray || itemsArray.length === 0) {
-            container.innerHTML = `<p class="text-slate-500 text-sm italic">No items on the list.</p>`;
-            return;
-        }
-
-        // Group active items by their AI category tag
-        const grouped = itemsArray.reduce((acc, item, index) => {
-            const cat = item.category || "📦 General";
-            if (!acc[cat]) acc[cat] = [];
-            acc[cat].push({ ...item, originalIndex: index });
-            return acc;
-        }, {});
-
-        // Render headers and items ONLY for categories that have items
-        Object.keys(grouped).forEach(categoryName => {
-            const categoryGroup = document.createElement('div');
-            categoryGroup.className = 'space-y-1 mb-3';
-
-            const header = document.createElement('h3');
-            header.className = 'text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2 mt-3';
-            header.textContent = categoryName;
-            categoryGroup.appendChild(header);
-
-            grouped[categoryName].forEach(item => {
-                const itemRow = document.createElement('label');
-                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
-                
-                itemRow.innerHTML = `
-                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
-                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
-                `;
-
-                itemRow.querySelector('input').addEventListener('change', (e) => {
-                    itemsArray[item.originalIndex].checked = e.target.checked;
-                    set(firebaseRef, itemsArray); 
-                });
-
-                categoryGroup.appendChild(itemRow);
-            });
-
-            container.appendChild(categoryGroup);
-        });
-    }
-
-    function renderGroceryList() {
-        renderDynamicList(globalGroceries, 'grocery-items-container', groceryRef);
-    }
-
-    function renderBeachList() {
-        renderDynamicList(globalBeachItems, 'beach-items-container', beachRef);
-    }
-
-    // ----------------- AI ADD FUNCTIONS -----------------
+    // --- DEFINE WINDOW FUNCTIONS FIRST ---
     window.addGroceryItem = async function() {
         const input = document.getElementById('grocery-input');
+        if (!input) return;
         const itemText = input.value.trim();
         if (!itemText) return;
 
@@ -201,7 +131,6 @@
                     });
                 });
             } else {
-                // Fallback if AI response format was unexpected
                 globalGroceries.push({ text: itemText, category: '📦 General', checked: false });
             }
             set(groceryRef, globalGroceries);
@@ -218,6 +147,7 @@
 
     window.addBeachItem = async function() {
         const input = document.getElementById('beach-input');
+        if (!input) return;
         const itemText = input.value.trim();
         if (!itemText) return;
 
@@ -266,23 +196,64 @@
         set(beachRef, globalBeachItems); 
     };
 
-    // ----------------- ENTER KEY LISTENERS -----------------
-    document.addEventListener('DOMContentLoaded', () => {
-        const gInput = document.getElementById('grocery-input');
-        const bInput = document.getElementById('beach-input');
-
-        if (gInput) {
-            gInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') window.addGroceryItem();
-            });
-        }
-
-        if (bInput) {
-            bInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') window.addBeachItem();
-            });
-        }
+    // --- REALTIME LISTENERS & RENDERING ---
+    onValue(groceryRef, (snapshot) => {
+        globalGroceries = snapshot.val() || [];
+        renderDynamicList(globalGroceries, 'grocery-items-container', groceryRef);
     });
+
+    onValue(beachRef, (snapshot) => {
+        globalBeachItems = snapshot.val() || [];
+        renderDynamicList(globalBeachItems, 'beach-items-container', beachRef);
+    });
+
+    function renderDynamicList(itemsArray, containerId, firebaseRef) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!itemsArray || itemsArray.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 text-sm italic">No items on the list.</p>`;
+            return;
+        }
+
+        const grouped = itemsArray.reduce((acc, item, index) => {
+            const cat = item.category || "📦 General";
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push({ ...item, originalIndex: index });
+            return acc;
+        }, {});
+
+        Object.keys(grouped).forEach(categoryName => {
+            const categoryGroup = document.createElement('div');
+            categoryGroup.className = 'space-y-1 mb-3';
+
+            const header = document.createElement('h3');
+            header.className = 'text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2 mt-3';
+            header.textContent = categoryName;
+            categoryGroup.appendChild(header);
+
+            grouped[categoryName].forEach(item => {
+                const itemRow = document.createElement('label');
+                itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
+                
+                itemRow.innerHTML = `
+                    <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
+                    <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
+                `;
+
+                itemRow.querySelector('input').addEventListener('change', (e) => {
+                    itemsArray[item.originalIndex].checked = e.target.checked;
+                    set(firebaseRef, itemsArray); 
+                });
+
+                categoryGroup.appendChild(itemRow);
+            });
+
+            container.appendChild(categoryGroup);
+        });
+    }
 </script>
 <body>
 </html>
