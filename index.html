@@ -46,35 +46,37 @@
                 </div>
             </div>
         </div>
-        <!-- RIGHT PANEL: Miller Beach Trip (Spans 6 columns) -->
+        <!-- RIGHT PANEL: Beach Packing List -->
         <div class="flex flex-col gap-2">
             <div>
+                <!-- 1. Header Title -->
                 <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
                     🏖️ Miller Beach Packing List
                 </h2>
-            </div>
-      <!-- Beach Quick Add Input -->
-        <div class="flex gap-2 mb-6">
-            <input type="text" id="beach-input" 
-                   placeholder="Add beach item (e.g., Towels, Cola's treats, Coolers)..." 
-                   onkeydown="if(event.key === 'Enter') window.addBeachItem()"
-                   class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="window.addBeachItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
-                Add
-            </button>
-        </div>
+            </div> <!-- 👈 THIS CLOSING DIV WAS MISSING HERE -->
 
-                <!-- DYNAMIC AI CONTAINER (Replaces all old category divs) -->
-                <div id="beach-items-container" class="space-y-4 overflow-y-auto max-h-[500px]"></div>
+            <!-- 2. Beach Quick Add Input -->
+            <div class="flex gap-2 mb-6">
+                <input type="text" id="beach-input" 
+                       placeholder="Add beach item (e.g., Towels, Cola's treats, Coolers)..." 
+                       onkeydown="if(event.key === 'Enter') window.addBeachItem()"
+                       class="w-full bg-slate-700 border border-slate-600 rounded-xl px-4 py-2.5 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button onclick="window.addBeachItem()" class="bg-blue-600 hover:bg-blue-500 text-white font-medium px-4 rounded-xl transition-colors">
+                    Add
+                </button>
+            </div>
 
-                <!-- Clear Button -->
-                <div class="mt-4 pt-4 border-t border-slate-700">
-                    <button onclick="window.clearCheckedBeachItems()" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">
-                        Clear Checked Items
-                    </button>
-                </div>
+            <!-- 3. Dynamic AI Container -->
+            <div id="beach-items-container" class="space-y-4 overflow-y-auto max-h-[500px]"></div>
+
+            <!-- 4. Clear Button -->
+            <div class="mt-4 pt-4 border-t border-slate-700">
+                <button onclick="window.clearCheckedBeachItems()" class="text-xs text-slate-400 hover:text-rose-400 transition-colors">
+                    Clear Checked Items
+                </button>
             </div>
         </div>
+  
 
     <!-- Firebase System Module Script -->
 <script type="module">
