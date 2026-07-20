@@ -75,43 +75,66 @@
         </div>
 
     <!-- Firebase System Module Script -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDhXXDOIpSLhZj6l6lNOYI5x1TEs6HA5fw",
-          authDomain: "family-hub-7d2b2.firebaseapp.com",
-          databaseURL: "https://family-hub-7d2b2-default-rtdb.firebaseio.com",
-          projectId: "family-hub-7d2b2",
-          storageBucket: "family-hub-7d2b2.firebasestorage.app",
-          messagingSenderId: "528172577034",
-          appId: "1:528172577034:web:ca48f878d8ed0dc2854af3"
-        };
+    // --- YOUR FIREBASE CONFIG HERE ---
+    const firebaseConfig = {
+        // ... Keep your existing firebaseConfig object ...
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        
-        // Setup two distinct database paths
-        const groceryRef = ref(db, 'groceryList');
-        const beachRef = ref(db, 'beachTripList');
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-// ----------------- GROCERY LIST FUNCTIONALITY -----------------
-        onValue(groceryRef, (snapshot) => {
-            globalGroceries = snapshot.val() || [];
-            renderGroceryList();
-        });
+    const groceryRef = ref(db, 'groceries');
+    const beachRef = ref(db, 'beachItems');
 
-        function renderGroceryList() {
-            ['produce', 'dairy', 'bakery', 'grocery-other'].forEach(cat => {
-                const el = document.getElementById(`cat-${cat}`);
-                if (el) el.innerHTML = '';
-            });
+    let globalGroceries = [];
+    let globalBeachItems = [];
 
-            globalGroceries.forEach((item, index) => {
-                const targetCat = item.category || 'grocery-other';
-                const container = document.getElementById(`cat-${targetCat}`) || document.getElementById('cat-grocery-other');
+    // ----------------- REALTIME LISTENERS -----------------
+    onValue(groceryRef, (snapshot) => {
+        globalGroceries = snapshot.val() || [];
+        renderGroceryList();
+    });
 
+    onValue(beachRef, (snapshot) => {
+        globalBeachItems = snapshot.val() || [];
+        renderBeachList();
+    });
+
+    // ----------------- SHARED DYNAMIC RENDER -----------------
+    function renderDynamicList(itemsArray, containerId, firebaseRef) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!itemsArray || itemsArray.length === 0) {
+            container.innerHTML = `<p class="text-slate-500 text-sm italic">No items on the list.</p>`;
+            return;
+        }
+
+        // Group active items by their AI category tag
+        const grouped = itemsArray.reduce((acc, item, index) => {
+            const cat = item.category || "📦 General";
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push({ ...item, originalIndex: index });
+            return acc;
+        }, {});
+
+        // Render headers and items ONLY for categories that have items
+        Object.keys(grouped).forEach(categoryName => {
+            const categoryGroup = document.createElement('div');
+            categoryGroup.className = 'space-y-1 mb-3';
+
+            const header = document.createElement('h3');
+            header.className = 'text-xs font-semibold text-sky-400 uppercase tracking-wider mb-2 mt-3';
+            header.textContent = categoryName;
+            categoryGroup.appendChild(header);
+
+            grouped[categoryName].forEach(item => {
                 const itemRow = document.createElement('label');
                 itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
                 
@@ -121,113 +144,135 @@
                 `;
 
                 itemRow.querySelector('input').addEventListener('change', (e) => {
-                    globalGroceries[index].checked = e.target.checked;
-                    set(groceryRef, globalGroceries); 
+                    itemsArray[item.originalIndex].checked = e.target.checked;
+                    set(firebaseRef, itemsArray); 
                 });
 
-                if (container) container.appendChild(itemRow);
+                categoryGroup.appendChild(itemRow);
             });
-        }
 
-        window.addGroceryItem = async function() {
-            const input = document.getElementById('grocery-input');
-            const itemText = input.value.trim();
-            if (!itemText) return;
+            container.appendChild(categoryGroup);
+        });
+    }
 
-            input.value = 'AI sorting...';
-            input.disabled = true;
+    function renderGroceryList() {
+        renderDynamicList(globalGroceries, 'grocery-items-container', groceryRef);
+    }
 
-            try {
-                const res = await fetch('/api/categorize', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ itemText: itemText, listType: 'grocery' })
-                });
+    function renderBeachList() {
+        renderDynamicList(globalBeachItems, 'beach-items-container', beachRef);
+    }
 
-                const data = await res.json();
-                
-                if (data.items && data.items.length) {
-                    data.items.forEach(item => {
-                        globalGroceries.push({ 
-                            text: item.text, 
-                            category: item.category, 
-                            checked: false 
-                        });
+    // ----------------- AI ADD FUNCTIONS -----------------
+    window.addGroceryItem = async function() {
+        const input = document.getElementById('grocery-input');
+        const itemText = input.value.trim();
+        if (!itemText) return;
+
+        input.value = 'AI sorting...';
+        input.disabled = true;
+
+        try {
+            const res = await fetch('/api/categorize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemText: itemText, listType: 'grocery' })
+            });
+
+            const data = await res.json();
+            
+            if (data.items && Array.isArray(data.items) && data.items.length) {
+                data.items.forEach(item => {
+                    globalGroceries.push({ 
+                        text: item.text, 
+                        category: item.category || '🥦 Produce', 
+                        checked: false 
                     });
-                    set(groceryRef, globalGroceries);
-                }
-            } catch (err) {
-                console.error('API Error, falling back to basic item:', err);
-                // Fallback: If API fails, save to default category
-                globalGroceries.push({ text: itemText, category: 'grocery-other', checked: false });
-                set(groceryRef, globalGroceries);
-            } finally {
-                input.value = '';
-                input.disabled = false;
-                input.focus();
+                });
+            } else {
+                // Fallback if AI response format was unexpected
+                globalGroceries.push({ text: itemText, category: '📦 General', checked: false });
             }
-        };
-
-        window.clearCheckedGroceries = function() {
-            globalGroceries = globalGroceries.filter(item => !item.checked);
-            set(groceryRef, globalGroceries); 
-        };
-       
-        // ----------------- MILLER BEACH TRIP FUNCTIONALITY -----------------
-        onValue(beachRef, (snapshot) => {
-            globalBeachItems = snapshot.val() || [];
-            renderBeachList();
-        });
-
-            function renderBeachList() {
-            ['gear', 'clothing', 'food', 'cola', 'beach-other'].forEach(cat => {
-            const el = document.getElementById(`cat-${cat}`);
-            if (el) el.innerHTML = '';
-            });
-
-            globalBeachItems.forEach((item, index) => {
-                const targetCat = item.category || 'beach-other';
-                const container = document.getElementById(`cat-${targetCat}`) || document.getElementById('cat-beach-other');
-
-                const itemRow = document.createElement('label');
-            itemRow.className = 'flex items-center gap-3 py-1.5 px-2 hover:bg-slate-750 rounded-lg cursor-pointer transition-colors group';
-        
-            itemRow.innerHTML = `
-                <input type="checkbox" ${item.checked ? 'checked' : ''} class="w-4 h-4 rounded border-slate-600 bg-slate-700 text-blue-600 focus:ring-blue-500 focus:ring-offset-slate-800">
-                <span class="text-sm ${item.checked ? 'line-through text-slate-500' : 'text-slate-300'} group-hover:text-white transition-colors">${item.text}</span>
-        `;
-
-            itemRow.querySelector('input').addEventListener('change', (e) => {
-                globalBeachItems[index].checked = e.target.checked;
-                set(beachRef, globalBeachItems); 
-            });
-
-        if (container) container.appendChild(itemRow);
-    });
-}
-        
-        window.addBeachItem = function() {
-            const input = document.getElementById('beach-input');
-            const itemText = input.value.trim();
-            if (!itemText) return;
-
-            globalBeachItems.push({ text: itemText, checked: false });
-            set(beachRef, globalBeachItems); 
+            set(groceryRef, globalGroceries);
+        } catch (err) {
+            console.error('API Error, saving locally:', err);
+            globalGroceries.push({ text: itemText, category: '📦 General', checked: false });
+            set(groceryRef, globalGroceries);
+        } finally {
             input.value = '';
+            input.disabled = false;
+            input.focus();
+        }
+    };
+
+    window.addBeachItem = async function() {
+        const input = document.getElementById('beach-input');
+        const itemText = input.value.trim();
+        if (!itemText) return;
+
+        input.value = 'AI sorting...';
+        input.disabled = true;
+
+        try {
+            const res = await fetch('/api/categorize', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ itemText: itemText, listType: 'beach' })
+            });
+
+            const data = await res.json();
+            
+            if (data.items && Array.isArray(data.items) && data.items.length) {
+                data.items.forEach(item => {
+                    globalBeachItems.push({ 
+                        text: item.text, 
+                        category: item.category || '🕶️ Beach Gear', 
+                        checked: false 
+                    });
+                });
+            } else {
+                globalBeachItems.push({ text: itemText, category: '📦 General', checked: false });
+            }
+            set(beachRef, globalBeachItems);
+        } catch (err) {
+            console.error('API Error, saving locally:', err);
+            globalBeachItems.push({ text: itemText, category: '📦 General', checked: false });
+            set(beachRef, globalBeachItems);
+        } finally {
+            input.value = '';
+            input.disabled = false;
+            input.focus();
+        }
+    };
+
+    window.clearCheckedGroceries = function() {
+        globalGroceries = globalGroceries.filter(item => !item.checked);
+        set(groceryRef, globalGroceries); 
+    };
+
+    window.clearCheckedBeachItems = function() {
+        globalBeachItems = globalBeachItems.filter(item => !item.checked);
+        set(beachRef, globalBeachItems); 
+    };
+
+    // ----------------- ENTER KEY LISTENERS -----------------
+    document.addEventListener('DOMContentLoaded', () => {
+        const gInput = document.getElementById('grocery-input');
+        const bInput = document.getElementById('beach-input');
+
+        if (gInput) {
+            gInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') window.addGroceryItem();
+            });
         }
 
-        window.clearCheckedBeach = function() {
-            globalBeachItems = globalBeachItems.filter(item => !item.checked);
-            set(beachRef, globalBeachItems); 
+        if (bInput) {
+            bInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') window.addBeachItem();
+            });
         }
-
-        // Global Key Interceptors (Enter Key to submit inputs)
-        document.getElementById('grocery-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') window.addGroceryItem();
-        });
-        document.getElementById('beach-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') window.addBeachItem();
-        });
-    </script>
-</body>
+    });
+</script>
+<body>
 </html>
+ 
