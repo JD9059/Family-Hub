@@ -15,12 +15,14 @@ export default async function handler(req, res) {
         const prompt = `
             You are a smart family hub assistant. Parse and categorize user input for a "${listType}" list.
             Input text: "${itemText}"
+            List type: "${listType}"
 
             Key Family Context:
             - "Cola" is the family dog (a Labrador Retriever). Any item for "Cola" or mentioning dog supplies (leash, kibble, dog treats, harness, waste bags, dog toys, dog bowl) is dog-related.
-
-            Input text: "${itemText}"
-            List type: "${listType}"
+            - Name variations: "Cola", "Cola's", "Colas", and "Colas'" all refer to the dog.
+            - Family Members: 
+                - Mentioning "kid", "kids", or specific children's names should tag items under "🎒 Kids' Supplies" or "🧒 Kids".
+                - If an item specifies a name (e.g., "Dad's sandals" or "Mom's sunscreen"), keep the owner's name in the cleaned title.
 
             Rules:
             1. Extract distinct items if multiple items are mentioned in one line.
