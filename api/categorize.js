@@ -16,6 +16,12 @@ export default async function handler(req, res) {
             You are a smart family hub assistant. Parse and categorize user input for a "${listType}" list.
             Input text: "${itemText}"
 
+            Key Family Context:
+            - "Cola" is the family dog (a Labrador Retriever). Any item for "Cola" or mentioning dog supplies (leash, kibble, dog treats, harness, waste bags, dog toys, dog bowl) is dog-related.
+
+            Input text: "${itemText}"
+            List type: "${listType}"
+
             Rules:
             1. Extract distinct items if multiple items are mentioned in one line.
             2. Clean up item labels to be concise and title-cased.
